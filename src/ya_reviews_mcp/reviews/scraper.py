@@ -1,4 +1,4 @@
-"""Playwright-based scraper for Yandex Maps reviews via DOM parsing."""
+"""Backend-driven scraper for Yandex Maps reviews via DOM parsing."""
 from __future__ import annotations
 
 import asyncio
@@ -6,16 +6,11 @@ import logging
 import re
 from typing import Any
 
-from playwright.async_api import (
-    Browser,
-    BrowserContext,
-    Page,
-    Playwright,
-    async_playwright,
-)
+from playwright.async_api import Page
+
+from ya_reviews_mcp.reviews.backends.base import BaseBrowserBackend
 
 from ya_reviews_mcp.exceptions import (
-    BrowserError,
     PageNotFoundError,
     ScrapingError,
 )
@@ -56,42 +51,27 @@ SEL_COMPANY_CATEGORIES = ".business-categories-view__category"
 
 
 class YaReviewsScraper:
-    """Manages a Playwright browser and parses Yandex Maps reviews from DOM."""
+    """Manages browser via backend and parses Yandex Maps reviews from DOM."""
 
-    def __init__(self, config: YaReviewsConfig) -> None:
+    def __init__(
+        self,
+        config: YaReviewsConfig,
+        backend: BaseBrowserBackend,
+    ) -> None:
         self.config = config
-        self._playwright: Playwright | None = None
-        self._browser: Browser | None = None
+        self._backend = backend
 
     async def start(self) -> None:
-        """Launch browser. Called once from lifespan."""
-        try:
-            self._playwright = await async_playwright().start()
-            self._browser = await self._playwright.chromium.launch(
-                headless=self.config.headless,
-                args=[
-                    "--disable-blink-features=AutomationControlled",
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                ],
-            )
-            logger.info("Browser launched (headless=%s)", self.config.headless)
-        except Exception as exc:
-            raise BrowserError(f"Failed to launch browser: {exc}") from exc
+        """Launch browser via backend. Called once from lifespan."""
+        await self._backend.start()
 
     async def close(self) -> None:
-        """Shut down browser. Called once from lifespan."""
-        if self._browser:
-            await self._browser.close()
-        if self._playwright:
-            await self._playwright.stop()
-        logger.info("Browser closed")
+        """Shut down browser via backend. Called once from lifespan."""
+        await self._backend.close()
 
-    async def _new_context(self) -> BrowserContext:
-        """Create a fresh browser context with appropriate settings."""
-        if self._browser is None:
-            raise BrowserError("Browser not started. Call start() first.")
-        return await self._browser.new_context(
+    async def _new_context(self) -> Any:
+        """Create a fresh browser context via backend."""
+        return await self._backend.new_context(
             locale=self.config.browser_locale,
             viewport={"width": 1280, "height": 720},
             user_agent=(
