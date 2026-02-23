@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import Literal
 
 import click
@@ -24,6 +25,15 @@ TRANSPORTS = ["stdio", "streamable-http", "sse"]
 @click.option("--host", default="0.0.0.0", help="HTTP host")
 @click.option("--env-file", default=None, help="Path to .env file")
 @click.option(
+    "--backend", default=None,
+    type=click.Choice(["playwright", "patchright", "remote"]),
+    help="Browser backend (default: from BROWSER_BACKEND env or 'playwright')",
+)
+@click.option(
+    "--browser-url", default=None,
+    help="WebSocket URL for remote backend (e.g., ws://localhost:3000)",
+)
+@click.option(
     "-v", "--verbose", count=True,
     help="Verbose logging (-v INFO, -vv DEBUG)",
 )
@@ -32,6 +42,8 @@ def main(
     port: int,
     host: str,
     env_file: str | None,
+    backend: str | None,
+    browser_url: str | None,
     verbose: int,
 ) -> None:
     """ya-reviews-mcp: Yandex Maps reviews MCP server."""
@@ -39,6 +51,12 @@ def main(
         load_dotenv(env_file)
     else:
         load_dotenv()
+
+    # CLI flags override env vars
+    if backend:
+        os.environ["BROWSER_BACKEND"] = backend
+    if browser_url:
+        os.environ["BROWSER_WS_URL"] = browser_url
 
     setup_logging(verbose)
     setup_signal_handlers()

@@ -1,4 +1,4 @@
-"""FastMCP server setup with lifespan and browser lifecycle."""
+"""FastMCP server setup with lifespan and browser backend lifecycle."""
 from __future__ import annotations
 
 import logging
@@ -8,6 +8,7 @@ from typing import Any
 
 from fastmcp import FastMCP
 
+from ya_reviews_mcp.reviews.backends import create_backend
 from ya_reviews_mcp.reviews.config import YaReviewsConfig
 from ya_reviews_mcp.reviews.fetchers.fetcher import YaReviewsFetcher
 from ya_reviews_mcp.reviews.scraper import YaReviewsScraper
@@ -20,14 +21,16 @@ logger = logging.getLogger("ya-reviews")
 async def main_lifespan(
     app: FastMCP[Any],
 ) -> AsyncIterator[MainAppContext]:
-    """Initialize and clean up the Playwright browser on server start/stop."""
+    """Initialize and clean up the browser backend on server start/stop."""
     config = YaReviewsConfig.from_env()
     logger.info(
-        "Starting ya-reviews-mcp, headless=%s, enabled_tools=%s",
+        "Starting ya-reviews-mcp, backend=%s, headless=%s, enabled_tools=%s",
+        config.backend,
         config.headless,
         config.enabled_tools,
     )
-    scraper = YaReviewsScraper(config)
+    backend = create_backend(config)
+    scraper = YaReviewsScraper(config, backend)
     await scraper.start()
     fetcher = YaReviewsFetcher(scraper)
     try:
