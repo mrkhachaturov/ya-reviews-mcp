@@ -16,6 +16,7 @@ class YaReviewsConfig:
     retry_delay: float = 2.0
     browser_locale: str = "ru-RU"
     enabled_tools: list[str] | None = None
+    browser_ws_url: str | None = None
 
     @classmethod
     def from_env(cls) -> YaReviewsConfig:
@@ -35,4 +36,5 @@ class YaReviewsConfig:
             retry_delay=float(os.environ.get("SCRAPER_RETRY_DELAY", "2.0")),
             browser_locale=os.environ.get("BROWSER_LOCALE", "ru-RU"),
             enabled_tools=enabled_tools,
+            browser_ws_url=os.environ.get("BROWSER_WS_URL"),
         )
