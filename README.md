@@ -1,6 +1,6 @@
 # ya-reviews-mcp
 
-![License](https://img.shields.io/github/license/mrkhachaturov/ya-reviews-mcp)
+![License](https://img.shields.io/badge/license-MIT-blue)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![FastMCP](https://img.shields.io/badge/FastMCP-2.13%2B-green)
 
