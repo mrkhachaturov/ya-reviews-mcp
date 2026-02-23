@@ -4,9 +4,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from playwright.async_api import Page
+if TYPE_CHECKING:
+    from playwright.async_api import Page
 
 from ya_reviews_mcp.exceptions import (
     PageNotFoundError,

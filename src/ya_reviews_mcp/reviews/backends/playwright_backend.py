@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from playwright.async_api import (
-    Browser,
-    BrowserContext,
-    Playwright,
-    async_playwright,
-)
+from playwright.async_api import async_playwright
+
+if TYPE_CHECKING:
+    from playwright.async_api import Browser, BrowserContext, Playwright
 
 from ya_reviews_mcp.exceptions import BrowserError
 from ya_reviews_mcp.reviews.backends.base import BaseBrowserBackend

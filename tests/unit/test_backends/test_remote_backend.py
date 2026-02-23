@@ -22,7 +22,7 @@ class TestRemoteCDPBackendStartClose:
         )
 
         with patch(
-            "ya_reviews_mcp.reviews.backends.remote_backend.async_playwright"
+            "playwright.async_api.async_playwright"
         ) as mock_apw:
             mock_apw.return_value.start = AsyncMock(return_value=mock_pw)
             await backend.start()

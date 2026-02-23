@@ -4,15 +4,11 @@ from __future__ import annotations
 import json
 import logging
 import urllib.request
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
-from playwright.async_api import (
-    Browser,
-    BrowserContext,
-    Playwright,
-    async_playwright,
-)
+if TYPE_CHECKING:
+    from playwright.async_api import Browser, BrowserContext, Playwright
 
 from ya_reviews_mcp.exceptions import BrowserError
 from ya_reviews_mcp.reviews.backends.base import BaseBrowserBackend
@@ -76,6 +72,7 @@ class RemoteCDPBackend(BaseBrowserBackend):
             )
         ws_url = _resolve_ws_url(self._config.browser_ws_url)
         try:
+            from playwright.async_api import async_playwright
             self._playwright = await async_playwright().start()
             self._browser = await self._playwright.chromium.connect_over_cdp(
                 ws_url,
