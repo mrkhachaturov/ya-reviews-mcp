@@ -8,12 +8,11 @@ from typing import Any
 
 from playwright.async_api import Page
 
-from ya_reviews_mcp.reviews.backends.base import BaseBrowserBackend
-
 from ya_reviews_mcp.exceptions import (
     PageNotFoundError,
     ScrapingError,
 )
+from ya_reviews_mcp.reviews.backends.base import BaseBrowserBackend
 from ya_reviews_mcp.reviews.config import YaReviewsConfig
 from ya_reviews_mcp.reviews.models import (
     CompanyInfo,

@@ -17,11 +17,11 @@ def create_backend(config: YaReviewsConfig) -> BaseBrowserBackend:
     """Create a browser backend based on config."""
     try:
         backend_type = BackendType(config.backend)
-    except ValueError:
+    except ValueError as exc:
         raise ValueError(
             f"Unknown backend: {config.backend!r}. "
             f"Choose from: {', '.join(b.value for b in BackendType)}"
-        )
+        ) from exc
 
     if backend_type == BackendType.PLAYWRIGHT:
         from ya_reviews_mcp.reviews.backends.playwright_backend import (

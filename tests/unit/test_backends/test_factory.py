@@ -4,8 +4,8 @@ from __future__ import annotations
 import pytest
 
 from ya_reviews_mcp.reviews.backends import BackendType, create_backend
-from ya_reviews_mcp.reviews.backends.playwright_backend import PlaywrightBackend
 from ya_reviews_mcp.reviews.backends.patchright_backend import PatchrightBackend
+from ya_reviews_mcp.reviews.backends.playwright_backend import PlaywrightBackend
 from ya_reviews_mcp.reviews.backends.remote_backend import RemoteCDPBackend
 from ya_reviews_mcp.reviews.config import YaReviewsConfig
 
