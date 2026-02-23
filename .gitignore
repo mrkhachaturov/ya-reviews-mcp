@@ -23,6 +23,7 @@ htmlcov/
 # Secrets
 .env
 .env.*
+!.env.example
 
 # Git worktrees
 .worktrees/
