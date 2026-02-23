@@ -17,6 +17,7 @@ class YaReviewsConfig:
     browser_locale: str = "ru-RU"
     enabled_tools: list[str] | None = None
     browser_ws_url: str | None = None
+    backend: str = "playwright"
 
     @classmethod
     def from_env(cls) -> YaReviewsConfig:
@@ -37,4 +38,5 @@ class YaReviewsConfig:
             browser_locale=os.environ.get("BROWSER_LOCALE", "ru-RU"),
             enabled_tools=enabled_tools,
             browser_ws_url=os.environ.get("BROWSER_WS_URL"),
+            backend=os.environ.get("BROWSER_BACKEND", "playwright"),
         )
