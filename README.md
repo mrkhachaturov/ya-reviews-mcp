@@ -1,5 +1,6 @@
 # ya-reviews-mcp
 
+[![PyPI](https://img.shields.io/pypi/v/ya-reviews-mcp)](https://pypi.org/project/ya-reviews-mcp/)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![FastMCP](https://img.shields.io/badge/FastMCP-2.13%2B-green)
@@ -119,7 +120,7 @@ All configuration via environment variables (no API key needed):
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BROWSER_BACKEND` | `playwright` | Browser backend: `playwright`, `patchright`, or `remote` |
-| `BROWSER_WS_URL` | — | WebSocket URL for remote backend (e.g., `ws://localhost:3000`) |
+| `BROWSER_WS_URL` | — | WebSocket URL for remote backend. Short form `ws://host:port` auto-discovers the full debugger URL. |
 | `BROWSER_HEADLESS` | `true` | Set to `false` for visual debugging |
 | `PAGE_TIMEOUT` | `30000` | Page load timeout in ms |
 | `INTERCEPT_TIMEOUT` | `15000` | Max wait for reviews to appear in DOM (ms) |
@@ -152,34 +153,6 @@ ya-reviews-mcp --backend remote --browser-url ws://localhost:3000
 
 # Load custom .env file
 ya-reviews-mcp --env-file /path/to/.env
-```
-
-## Installation
-
-**From PyPI (with Playwright):**
-```bash
-pip install ya-reviews-mcp[playwright]
-playwright install chromium
-```
-
-**From PyPI (with Patchright):**
-```bash
-pip install ya-reviews-mcp[patchright]
-patchright install chromium
-```
-
-**From PyPI (remote browser only):**
-```bash
-pip install ya-reviews-mcp
-```
-
-**From source:**
-```bash
-git clone https://github.com/mrkhachaturov/ya-reviews-mcp
-cd ya-reviews-mcp
-uv sync --extra playwright
-uv run playwright install chromium
-uv run ya-reviews-mcp
 ```
 
 ## How It Works
