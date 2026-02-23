@@ -17,18 +17,20 @@ Choose your backend:
 
 ```bash
 # Option A: Playwright (default)
-pip install ya-reviews-mcp[playwright]
+uv tool install ya-reviews-mcp[playwright]
 playwright install chromium
 
 # Option B: Patchright (better anti-detection)
-pip install ya-reviews-mcp[patchright]
+uv tool install ya-reviews-mcp[patchright]
 patchright install chromium
 
 # Option C: Remote browser (no local browser needed)
-pip install ya-reviews-mcp
+uv tool install ya-reviews-mcp
 # Then run a browser separately, e.g.:
 # docker run -p 3000:3000 ghcr.io/browserless/chromium
 ```
+
+> **No uv?** Use pip instead: `pip install ya-reviews-mcp[playwright]`
 
 ### 2. Find the Organization ID
 
