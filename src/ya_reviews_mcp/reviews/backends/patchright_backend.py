@@ -26,6 +26,11 @@ def _import_patchright() -> Any:
 class PatchrightBackend(BaseBrowserBackend):
     """Browser backend using Patchright (anti-detection Playwright fork)."""
 
+    @property
+    def handles_stealth(self) -> bool:
+        """Patchright patches navigator.webdriver natively."""
+        return True
+
     def __init__(self, config: YaReviewsConfig) -> None:
         self._config = config
         self._playwright: Any = None

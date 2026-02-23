@@ -20,6 +20,15 @@ class BaseBrowserBackend(ABC):
     async def close(self) -> None:
         """Shut down the browser or disconnect."""
 
+    @property
+    def handles_stealth(self) -> bool:
+        """Whether the backend handles anti-detection natively.
+
+        When True, the scraper skips its own navigator.webdriver override
+        to avoid conflicts with the backend's stealth patches.
+        """
+        return False
+
     @abstractmethod
     async def new_context(self, **kwargs: Any) -> Any:
         """Create a fresh, isolated browser context.

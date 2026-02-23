@@ -103,11 +103,13 @@ class YaReviewsScraper:
             page = await context.new_page()
 
             # Hide webdriver flag before navigation
-            await page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined,
-                });
-            """)
+            # Skip if backend handles stealth natively (e.g., Patchright)
+            if not self._backend.handles_stealth:
+                await page.add_init_script("""
+                    Object.defineProperty(navigator, 'webdriver', {
+                        get: () => undefined,
+                    });
+                """)
 
             url = REVIEWS_URL_TEMPLATE.format(org_id=org_id)
 
