@@ -1,6 +1,7 @@
 # ya-reviews-mcp
 
-MCP server that scrapes Yandex Maps business reviews via Playwright headless browser.
+MCP server that scrapes Yandex Maps business reviews via headless browser.
+Supports multiple backends: Playwright (default), Patchright (anti-detection), Remote CDP.
 
 ## Commands
 
@@ -8,7 +9,11 @@ MCP server that scrapes Yandex Maps business reviews via Playwright headless bro
 |---------|-------------|
 | `uv sync --extra dev` | Install all dependencies (including dev) |
 | `uv run playwright install chromium` | Install Chromium (required before first run) |
-| `uv run ya-reviews-mcp` | Run server (stdio transport) |
+| `uv sync --extra patchright` | Install with Patchright backend |
+| `uv run patchright install chromium` | Install Chromium for Patchright |
+| `uv run ya-reviews-mcp` | Run server (stdio transport, Playwright default) |
+| `uv run ya-reviews-mcp --backend patchright` | Run with Patchright backend |
+| `uv run ya-reviews-mcp --backend remote --browser-url ws://localhost:9222` | Run with remote browser |
 | `uv run ya-reviews-mcp --transport streamable-http --port 8000` | Run with HTTP transport |
 | `uv run pytest` | Run tests |
 | `uv run ruff check src/` | Lint |
@@ -24,7 +29,13 @@ src/ya_reviews_mcp/
   reviews/
     config.py           # YaReviewsConfig — env-based settings dataclass
     models.py           # Pydantic models: Review, CompanyInfo, ReviewsResult
-    scraper.py          # YaReviewsScraper — Playwright browser + DOM parsing
+    scraper.py          # YaReviewsScraper — backend-agnostic DOM parsing
+    backends/
+      __init__.py       # BackendType enum + create_backend() factory (lazy imports)
+      base.py           # BaseBrowserBackend ABC (start, close, new_context, handles_stealth)
+      playwright_backend.py  # Standard Playwright backend
+      patchright_backend.py  # Anti-detection Patchright fork (handles_stealth=True)
+      remote_backend.py      # Remote CDP via WebSocket (auto-discovers debugger URL)
     fetchers/
       base.py           # BaseFetcher — JSON response formatting
       reviews.py        # ReviewsMixin — business logic (get_reviews, get_company_info, get_company_summary)
@@ -61,12 +72,17 @@ src/ya_reviews_mcp/
 - The scraper uses DOM CSS selectors, not an API — Yandex Maps DOM changes can break parsing
 - Single browser instance is shared across requests; each request gets a fresh context for cookie isolation
 - Anti-detection measures: webdriver flag hidden, realistic user-agent, automation flags disabled
+- **Patchright conflicts with manual webdriver override** — PatchrightBackend sets `handles_stealth=True`; the scraper skips its own `navigator.webdriver` init script to avoid conflicts
+- **Remote CDP accepts short URLs** — `ws://localhost:9222` auto-discovers the full debugger URL via `/json/version`; full URLs like `ws://host:port/devtools/browser/<id>` also work
+- **Playwright and Patchright are optional deps** — lazy-imported at runtime; install via extras (`[playwright]`, `[patchright]`, or `[all-backends]`)
 - First request is slower (browser page load); subsequent requests reuse the browser
 
 ## Environment
 
 All optional. Set via `.env` file or environment variables (see `.env.example`):
 
+- `BROWSER_BACKEND` — `playwright`/`patchright`/`remote` (default: playwright)
+- `BROWSER_WS_URL` — WebSocket URL for remote backend (e.g., `ws://localhost:9222`)
 - `BROWSER_HEADLESS` — `true`/`false` (default: true)
 - `PAGE_TIMEOUT` — page load timeout in ms (default: 30000)
 - `INTERCEPT_TIMEOUT` — wait for reviews DOM in ms (default: 15000)
@@ -80,5 +96,6 @@ All optional. Set via `.env` file or environment variables (see `.env.example`):
 
 - `uv run pytest` — all tests
 - `uv run pytest tests/unit/test_scraper.py` — single file
+- `uv run pytest tests/unit/test_backends/` — backend-specific tests (factory, base, all 3 backends)
 - Tests use mocks for Playwright elements (no real browser needed)
 - pytest-asyncio with `asyncio_mode = "auto"` — no `@pytest.mark.asyncio` needed
