@@ -6,16 +6,27 @@
 
 Model Context Protocol (MCP) server for [Yandex Maps](https://yandex.ru/maps/) business reviews. Scrapes reviews from any Yandex Maps organization page and exposes them to your AI assistant — review text, ratings, author info, likes/dislikes, business responses, and company metadata.
 
-No API key required. Uses a headless Chromium browser under the hood via [Playwright](https://playwright.dev/).
+No API key required. Uses a headless Chromium browser under the hood. Supports multiple browser backends: [Playwright](https://playwright.dev/), [Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-python) (anti-detection), or a remote browser via CDP.
 
 ## Quick Start
 
-### 1. Install Playwright Browser
+### 1. Install
 
-After installing the package, you need to install the Chromium browser binary:
+Choose your backend:
 
 ```bash
+# Option A: Playwright (default)
+pip install ya-reviews-mcp[playwright]
 playwright install chromium
+
+# Option B: Patchright (better anti-detection)
+pip install ya-reviews-mcp[patchright]
+patchright install chromium
+
+# Option C: Remote browser (no local browser needed)
+pip install ya-reviews-mcp
+# Then run a browser separately, e.g.:
+# docker run -p 3000:3000 ghcr.io/browserless/chromium
 ```
 
 ### 2. Find the Organization ID
@@ -37,11 +48,13 @@ Add to your Claude Desktop / Cursor MCP configuration:
   "mcpServers": {
     "ya-reviews": {
       "command": "uvx",
-      "args": ["ya-reviews-mcp"]
+      "args": ["--from", "ya-reviews-mcp[playwright]", "ya-reviews-mcp"]
     }
   }
 }
 ```
+
+> **Using Patchright?** Replace `ya-reviews-mcp[playwright]` with `ya-reviews-mcp[patchright]` and add `"--backend", "patchright"` to args.
 
 > **Running from source?** Use `uv run` instead:
 > ```json
@@ -105,6 +118,8 @@ All configuration via environment variables (no API key needed):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `BROWSER_BACKEND` | `playwright` | Browser backend: `playwright`, `patchright`, or `remote` |
+| `BROWSER_WS_URL` | — | WebSocket URL for remote backend (e.g., `ws://localhost:3000`) |
 | `BROWSER_HEADLESS` | `true` | Set to `false` for visual debugging |
 | `PAGE_TIMEOUT` | `30000` | Page load timeout in ms |
 | `INTERCEPT_TIMEOUT` | `15000` | Max wait for reviews to appear in DOM (ms) |
@@ -129,30 +144,47 @@ ya-reviews-mcp --transport streamable-http --port 8000
 # With verbose logging
 ya-reviews-mcp -vv
 
+# Use Patchright backend
+ya-reviews-mcp --backend patchright
+
+# Use remote browser
+ya-reviews-mcp --backend remote --browser-url ws://localhost:3000
+
 # Load custom .env file
 ya-reviews-mcp --env-file /path/to/.env
 ```
 
 ## Installation
 
-**From PyPI:**
+**From PyPI (with Playwright):**
 ```bash
-uvx ya-reviews-mcp
+pip install ya-reviews-mcp[playwright]
 playwright install chromium
+```
+
+**From PyPI (with Patchright):**
+```bash
+pip install ya-reviews-mcp[patchright]
+patchright install chromium
+```
+
+**From PyPI (remote browser only):**
+```bash
+pip install ya-reviews-mcp
 ```
 
 **From source:**
 ```bash
 git clone https://github.com/mrkhachaturov/ya-reviews-mcp
 cd ya-reviews-mcp
-uv sync
+uv sync --extra playwright
 uv run playwright install chromium
 uv run ya-reviews-mcp
 ```
 
 ## How It Works
 
-Unlike `ya-metrics-mcp` which uses the official Yandex Metrika API, Yandex Maps has no public API for reviews. This server uses Playwright to:
+Unlike `ya-metrics-mcp` which uses the official Yandex Metrika API, Yandex Maps has no public API for reviews. This server uses a headless browser to:
 
 1. Navigate to the organization's reviews page on `yandex.ru/maps`
 2. Parse review data from the server-rendered DOM (schema.org structured data)
@@ -165,7 +197,7 @@ A single Chromium browser instance is shared across requests via FastMCP's lifes
 ## Development
 
 ```bash
-# Install with dev dependencies
+# Install with dev dependencies (includes playwright)
 uv sync --extra dev
 
 # Install browser
